@@ -2,7 +2,7 @@
 LND
 
 Usage:
-  ln.py forwardtx [--aggr]
+  ln.py forwardtx [--aggr] [--loop]
 
 Options:
   -h --help     Show this screen.
@@ -14,7 +14,8 @@ import os, grpc, time, datetime, json
 import config
 import libs.rpc_pb2 as ln
 import libs.rpc_pb2_grpc as lnrpc
-
+import threading
+import time
 from docopt import docopt
 
 def metadata_callback(context, callback):
@@ -111,10 +112,19 @@ def list(aggr=False):
      #events_aggr = [(x,y,z,a) for x,y,z,a in groupby(events, itemgetter(2,3))]
 
     #print(events_aggr)
+def listloop():
+    while True:
+        list()
+        print('----------------------------------------------------------------------------------------------------------------------')
+        time.sleep(60 * 10)
 
 def main(args):
-    if args["forwardtx"]:
-        list(args['--aggr'])
+    if args['--loop']:
+        thread = threading.Thread(target=listloop, name="fwtx")
+        thread.start()
+    else:
+        if args["forwardtx"]:
+            list(args['--aggr'])
 
 if __name__ == '__main__':
     # print(docopt(__doc__))
